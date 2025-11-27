@@ -10,370 +10,36 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        /* --- 1. RESET & GLOBAL VARIABLE --- */
-        :root {
-            --bg-color: #f9f9f9;
-            --text-main: #111111;
-            --border-color: #000000;
-            --border-light: #cccccc;
-            --color-pos: #2ECC71;
-            --color-neg: #E74C3C;
-            --color-neu: #BDBDBD;
-            --font-mono: 'Space Mono', monospace;
-            --header-h: 60px;
-            /* Tinggi Header Fix */
-            --ticker-h: 60px;
-            /* Tinggi Ticker Fix */
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-mono);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-size: 12px;
-            height: 100vh;
-            /* Kunci tinggi layar 100% */
-            display: flex;
-            flex-direction: column;
-            /* Susun vertikal rapi */
-            overflow: hidden;
-            /* Hilangkan scroll luar body */
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        /* --- 2. HEADER (RAPAT TAPI TIDAK TUMPUK) --- */
-        header {
-            height: var(--header-h);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            border-bottom: 1px solid var(--border-color);
-            background: #fff;
-            flex-shrink: 0;
-            /* Jangan mengecil */
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-            /* Beri ruang aman untuk logo */
-        }
-
-        .logo-main {
-            font-family: serif;
-            font-style: italic;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .logo-sub {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .logo-tag {
-            font-size: 0.65rem;
-            vertical-align: top;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            font-weight: 700;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
-        .nav-right {
-            width: 250px;
-            /* Samakan width dengan kiri biar tengah simetris */
-            text-align: right;
-            font-size: 0.75rem;
-            text-decoration: underline;
-            font-weight: 700;
-        }
-
-        /* --- 3. TICKER BAR (HINDARI TABRAKAN) --- */
-        .sentiment-ticker {
-            height: var(--ticker-h);
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            background: #fff;
-            flex-shrink: 0;
-        }
-
-        .ticker-item {
-            flex: 1;
-            /* Bagi rata lebar */
-            border-right: 1px solid var(--border-light);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 30px;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-            /* Anti wrapping/turun baris */
-        }
-
-        .ticker-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .ticker-label {
-            font-size: 0.7rem;
-            color: #666;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .ticker-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        /* --- 4. MAIN CONTENT (FLEXIBLE FILL) --- */
-        .main-layout {
-            display: flex;
-            flex: 1;
-            /* Isi sisa ruang layar */
-            overflow: hidden;
-            /* Kunci agar anak elemen yang scroll */
-        }
-
-        /* --- BAGIAN KIRI: CHART --- */
-        .chart-section {
-            flex: 7;
-            /* 70% Lebar */
-            border-right: 1px solid var(--border-color);
-            padding: 20px 30px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 10px;
-            flex-shrink: 0;
-        }
-
-        .chart-title {
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .chart-controls button {
-            background: none;
-            border: 1px solid #000;
-            padding: 4px 12px;
-            font-family: var(--font-mono);
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .chart-controls button.active {
-            background: #000;
-            color: #fff;
-        }
-
-        /* Container Canvas Wajib Relative & Full Height */
-        .canvas-wrapper {
-            flex: 1;
-            /* Isi sisa tinggi vertical di area chart */
-            position: relative;
-            width: 100%;
-            min-height: 0;
-            /* Penting untuk Chart.js resize */
-        }
-
-        /* Watermark */
-        .watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            opacity: 0.08;
-            font-size: 3rem;
-            font-weight: bold;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        /* --- BAGIAN KANAN: SIDEBAR --- */
-        .sidebar {
-            flex: 3;
-            /* 30% Lebar */
-            padding: 25px;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            /* Scroll jika layar terlalu pendek */
-        }
-
-        .sidebar-header {
-            text-align: right;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .stat-box {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .stat-val {
-            font-size: 2.5rem;
-            font-weight: 700;
-            line-height: 1;
-            margin-top: 5px;
-            display: inline-block;
-            border-bottom: 3px solid #000;
-        }
-
-        .desc-text {
-            font-size: 0.75rem;
-            line-height: 1.6;
-            text-align: justify;
-            color: #333;
-            flex-grow: 1;
-            /* Dorong tombol ke bawah */
-        }
-
-        .desc-text p {
-            margin-bottom: 15px;
-        }
-
-        .btn-download {
-            margin-top: auto;
-            /* Tempel di bawah */
-            background: #000;
-            color: #fff;
-            text-align: center;
-            padding: 15px;
-            text-transform: uppercase;
-            font-weight: 700;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border: 1px solid #000;
-            transition: all 0.2s;
-        }
-
-        .btn-download:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        /* --- FOOTER (FIXED BOTTOM) --- */
-        footer {
-            height: 30px;
-            flex-shrink: 0;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            font-size: 0.65rem;
-            background: #f4f4f4;
-            color: #666;
-        }
-
-        /* --- RESPONSIVE MOBILE --- */
-        @media (max-width: 900px) {
-            body {
-                height: auto;
-                overflow: auto;
-            }
-
-            .main-layout {
-                flex-direction: column;
-            }
-
-            .chart-section {
-                height: 400px;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .sidebar {
-                height: auto;
-            }
-
-            .logo {
-                width: auto;
-            }
-
-            .nav-right {
-                width: auto;
-                display: none;
-            }
-
-            /* Sembunyikan 'About' di HP */
-        }
-    </style>
 </head>
 
 <body>
 
     <header>
         <div class="logo">
-            <span style="font-family: serif; font-style: italic; font-size: 1.8rem;">Sentiment</span> 
+            <span style="font-family: serif; font-style: italic; font-size: 1.8rem;">Sentiment</span>
             <span style="font-family: var(--font-mono); font-size: 1.2rem;">Arena</span>
-            <span style="font-size: 0.7rem; vertical-align: top;">by TNGC.COM</span>
+            <span style="font-size: 0.7rem; vertical-align: top;">by TNGC.ID</span>
         </div>
         <nav class="nav-links">
-            <a href="#" style="color: var(--text-main);">LIVE</a>
-            <a href="#" style="color: var(--border-light);">BLOG</a>
+            <a href="index.html" style="color: var(--text-main);">LIVE</a>
+            <a href="pages/blog.html" style="color: var(--border-light);">BLOG</a>
         </nav>
-        <a href="#" class="nav-right">ABOUT PROJECT &#8599;</a>
+        <a href="pages/about.html" class="nav-right">ABOUT PROJECT &#8599;</a>
     </header>
 
     <div class="sentiment-ticker">
-        <div class="ticker-item" onclick="toggleData(0)">
+        <div class="ticker-item" onclick="window.location.href='pages/positif.html'">
             <div class="ticker-label"><span class="dot" style="background: var(--color-pos);"></span> POSITIF</div>
             <div class="ticker-value" style="color: var(--color-pos);">23.415</div>
         </div>
-        <div class="ticker-item" onclick="toggleData(1)">
+        <div class="ticker-item" onclick="window.location.href='pages/negatif.html'">
             <div class="ticker-label"><span class="dot" style="background: var(--color-neg);"></span> NEGATIF</div>
             <div class="ticker-value" style="color: var(--color-neg);">4.912</div>
         </div>
-        <div class="ticker-item" onclick="toggleData(2)">
+        <div class="ticker-item" onclick="window.location.href='pages/netral.html'">
             <div class="ticker-label"><span class="dot" style="background: var(--color-neu);"></span> NETRAL</div>
             <div class="ticker-value" style="color: var(--color-neu);">8.114</div>
         </div>
@@ -392,8 +58,11 @@
                     <h2 class="chart-title">Trend Sentiment Analysis — TNGC</h2>
                 </div>
                 <div class="chart-controls">
-                    <button class="active">ALL</button>
-                    <button>72H</button>
+                    <select id="rangeSelector">
+                        <option value="1D">1D</option>
+                        <option value="1W">1W</option>
+                        <option value="ALL" selected>ALL</option>
+                    </select>
                 </div>
             </div>
 
@@ -401,7 +70,7 @@
                 <canvas id="sentimentChart"></canvas>
             </div>
 
-            <div class="watermark">TNGC.COM</div>
+            <div class="watermark">TNGC.ID</div>
         </main>
 
         <aside class="sidebar">
@@ -439,96 +108,7 @@
         <div>Created with Support Vector Machine (SVM)</div>
     </footer>
 
-    <script>
-        const ctx = document.getElementById('sentimentChart').getContext('2d');
-
-        // Data Dummy
-        const labels = ['Okt 01', 'Okt 05', 'Okt 10', 'Okt 15', 'Okt 20', 'Okt 25', 'Okt 30', 'Nov 05', 'Nov 10', 'Nov 15', 'Nov 20'];
-        const dataPositif = [100, 120, 115, 140, 135, 160, 155, 180, 175, 190, 210];
-        const dataNegatif = [50, 45, 60, 55, 50, 40, 35, 30, 45, 25, 20];
-        const dataNetral = [80, 85, 80, 82, 88, 90, 85, 88, 92, 95, 90];
-
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Positif',
-                        data: dataPositif,
-                        borderColor: '#2ECC71',
-                        backgroundColor: '#2ECC71',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Negatif',
-                        data: dataNegatif,
-                        borderColor: '#E74C3C',
-                        backgroundColor: '#E74C3C',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Netral',
-                        data: dataNetral,
-                        borderColor: '#BDBDBD',
-                        backgroundColor: '#BDBDBD',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        tension: 0.3,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Wajib false agar mengikuti container flex
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#000',
-                        titleFont: { family: 'Space Mono', size: 11 },
-                        bodyFont: { family: 'Space Mono', size: 11 },
-                        padding: 12,
-                        cornerRadius: 0,
-                        displayColors: true
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: true, color: '#f0f0f0' },
-                        ticks: { font: { family: 'Space Mono', size: 10 } }
-                    },
-                    y: {
-                        grid: { display: true, color: '#f0f0f0' },
-                        ticks: { font: { family: 'Space Mono', size: 10 } }
-                    }
-                }
-            }
-        });
-
-        function toggleData(index) {
-            const meta = chart.getDatasetMeta(index);
-            meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-            chart.update();
-
-            const tickers = document.querySelectorAll('.ticker-item');
-            if (meta.hidden) {
-                tickers[index].style.opacity = '0.3';
-                tickers[index].style.background = '#fafafa';
-            } else {
-                tickers[index].style.opacity = '1';
-                tickers[index].style.background = 'transparent';
-            }
-        }
-    </script>
+    <script src="assets/js/main.js"></script>
 </body>
 
 </html>
